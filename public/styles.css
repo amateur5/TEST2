@@ -18,7 +18,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    margin: 20px; /* Razmak od ivice */
+    margin: 20px;
 }
 
 #authContainer form {
@@ -49,20 +49,20 @@ body {
     width: 100%;
     padding: 10px;
     background-color: #333;
-    color: #00ffff; /* Bela neon boja za dugme */
-    border: 1px solid #00ffff; /* Neon ivica */
+    color: #00ffff;
+    border: 1px solid #00ffff;
     border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     margin-top: 10px;
-    box-shadow: 0px 0px 8px rgba(0, 255, 255, 0.7); /* Neon senka */
+    box-shadow: 0px 0px 8px rgba(0, 255, 255, 0.7);
 }
 
 #authContainer button[type="submit"]:hover {
     color: #333;
-    background-color: #00ffff; /* Obrnuta neon boja na hover */
+    background-color: #00ffff;
     border-color: #00ffff;
 }
 
@@ -136,7 +136,7 @@ body {
     overflow: hidden;
 }
 
-#guestList {
+#userList {
     position: absolute;
     right: 0;
     top: 60px;
@@ -149,7 +149,7 @@ body {
     overflow-y: auto;
 }
 
-.guest {
+.user {
     padding: 5px;
     border-bottom: 1px solid white;
     cursor: pointer;
