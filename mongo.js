@@ -18,6 +18,12 @@ const connectDB = async () => {
     }
 };
 
+// Generisanje broja za goste
+const generateGuestNumber = () => {
+    // Na primer, generišemo nasumičan broj između 1000 i 9999
+    return Math.floor(Math.random() * 9000) + 1000;
+};
+
 // Definisanje modela za korisnike sa novim poljima za goste
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
@@ -25,12 +31,15 @@ const userSchema = new mongoose.Schema({
     role: { 
         type: String, 
         enum: ['admin', 'guest_number', 'guest_nickname'],  
-        default: function() {
-            return this.username === 'Radio Galaksija' ? 'admin' : 'guest_number';
-        }
+        default: 'guest_number' // Podrazumevano je da su gosti sa brojem
     },
-    guestNumber: { type: String, unique: true, sparse: true },  // Jedinstveni broj za goste sa brojem
-    nickname: { type: String, unique: true, sparse: true },  // Jedinstveni nadimak za goste sa nikom
+    guestNumber: { 
+        type: String, 
+        unique: true, 
+        sparse: true, 
+        default: generateGuestNumber // Automatski generiše broj kada je korisnik guest_number
+    },
+    nickname: { type: String, unique: true, sparse: true }, // Nadimak za goste sa nikom
 }, { timestamps: true });
 
 // Kreiramo model za korisnike
