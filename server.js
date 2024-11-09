@@ -59,7 +59,7 @@ app.post('/login', async (req, res) => {
             if (socket) {
                 socket.emit('userLoggedIn', { username, role });
             }
-            
+
             res.send(role === 'admin' ? 'Logged in as admin' : 'Logged in as guest');
         } else {
             res.status(400).send('Invalid credentials');
