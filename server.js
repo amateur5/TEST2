@@ -106,9 +106,9 @@ io.on('connection', (socket) => {
     const uniqueNumber = generateUniqueNumber();
     const nickname = `Gost-${uniqueNumber}`;
 
-    guests[guestId] = nickname;
+    guests[guestId] = { nickname, color: '#FFFFFF' }; // Početna boja za gosta
     console.log(`${nickname} se povezao.`);
-    
+
     // Provera da li je gost banovan
     if (banModule.isGuestBanned(guestId)) {
         socket.disconnect();
@@ -120,7 +120,7 @@ io.on('connection', (socket) => {
 
     // Prijavljivanje gosta
     socket.on('userLoggedIn', (username) => {
-        guests[guestId] = username;
+        guests[guestId].nickname = username; // Ažuriramo nickname
         io.emit('updateGuestList', Object.values(guests));
     });
 
@@ -132,15 +132,21 @@ io.on('connection', (socket) => {
             bold: msgData.bold,
             italic: msgData.italic,
             color: msgData.color,
-            nickname: guests[guestId],
+            nickname: guests[guestId].nickname,
             time: time
         };
         io.emit('chatMessage', messageToSend);
     });
 
+    // Funkcija za ažuriranje boje korisnika
+    socket.on('updateUserColor', (data) => {
+        guests[guestId].color = data.color;  // Ažuriraj boju korisnika
+        io.emit('updateGuestList', Object.values(guests)); // Ažuriraj listu korisnika
+    });
+
     // Banovanje gosta samo od strane admina "Radio Galaksija"
     socket.on("toggleBanUser", (targetGuestId) => {
-        if (guests[guestId] === "Radio Galaksija") {
+        if (guests[guestId].nickname === "Radio Galaksija") {
             banModule.isGuestBanned(targetGuestId) ? 
                 banModule.unbanGuest(targetGuestId) : 
                 banModule.banGuest(targetGuestId);
@@ -151,8 +157,8 @@ io.on('connection', (socket) => {
 
     // Odlazak gosta sa četa
     socket.on('disconnect', () => {
-        console.log(`${guests[guestId]} se odjavio.`);
-        assignedNumbers.delete(parseInt(guests[guestId].split('-')[1], 10));
+        console.log(`${guests[guestId].nickname} se odjavio.`);
+        assignedNumbers.delete(parseInt(guests[guestId].nickname.split('-')[1], 10));
         delete guests[guestId];
 
         // Uklanjanje IP adrese gosta iz spiska kada se odjavi
