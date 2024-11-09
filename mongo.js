@@ -18,17 +18,19 @@ const connectDB = async () => {
     }
 };
 
-// Definisanje modela za korisnike sa ulogom guest umesto user
+// Definisanje modela za korisnike sa novim poljima za goste
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { 
         type: String, 
-        enum: ['admin', 'guest'],  
+        enum: ['admin', 'guest_number', 'guest_nickname'],  
         default: function() {
-            return this.username === 'Radio Galaksija' ? 'admin' : 'guest';
+            return this.username === 'Radio Galaksija' ? 'admin' : 'guest_number';
         }
-    }  
+    },
+    guestNumber: { type: String, unique: true, sparse: true },  // Jedinstveni broj za goste sa brojem
+    nickname: { type: String, unique: true, sparse: true },  // Jedinstveni nadimak za goste sa nikom
 }, { timestamps: true });
 
 // Kreiramo model za korisnike
