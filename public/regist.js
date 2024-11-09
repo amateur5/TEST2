@@ -40,11 +40,21 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         },
         body: JSON.stringify({ username, password })
     })
-    .then(response => {
-        if (response.ok) {
+    .then(response => response.json()) // Pretpostavljamo da server vraća JSON sa statusom i rolnom
+    .then(data => {
+        if (data.success) {
             alert('Prijava uspešna');
             console.log(`Događaj za prijavu emitovan za korisnika: ${username}`);
             socket.emit('userLoggedIn', username); // Emituj događaj sa korisničkim imenom
+
+            // Provera da li je korisnik admin
+            if (data.isAdmin) {
+                alert('Dobrodošli, Admin!');
+                // Ovde možeš da dodaš specifične funkcionalnosti za admina
+            } else {
+                alert('Dobrodošli, korisniče!');
+            }
+
             this.reset(); // Isprazni formu
         } else {
             alert('Nevažeći podaci za prijavu');
