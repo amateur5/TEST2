@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const { connectDB, User } = require('./mongo');
 const bcrypt = require('bcrypt');
-require('dotenv').config();
 const banModule = require("./banModule");
 const ipModule = require('./ip');
 
@@ -52,16 +52,15 @@ app.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ username });
         if (user && await bcrypt.compare(password, user.password)) {
-            const role = user.role; // Preuzmi rolu korisnika iz baze
-            const socketId = req.headers['x-socket-id']; // Uzmemo socket ID iz header-a zahteva
-            
-            // Emitovanje samo prijavljenom korisniku na osnovu socket ID-a
+            const role = user.role;
+            const socketId = req.headers['x-socket-id']; // Uzimamo socket ID iz header-a
+
+            // Emitovanje događaja korisniku sa socket ID
             const socket = io.sockets.sockets.get(socketId);
             if (socket) {
                 socket.emit('userLoggedIn', { username, role });
             }
             
-            // Odgovor klijentu o statusu prijave
             res.send(role === 'admin' ? 'Logged in as admin' : 'Logged in as guest');
         } else {
             res.status(400).send('Invalid credentials');
