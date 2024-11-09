@@ -42,9 +42,6 @@ if (colorPicker) {
         currentColor = this.value;
         console.log(`Izabrana boja: ${currentColor}`);  // Log kada korisnik izabere boju
         updateInputStyle();
-
-        // Emitovanje nove boje na server
-        socket.emit('updateUserColor', { color: currentColor });
     });
 }
 
@@ -57,6 +54,39 @@ function updateInputStyle() {
         inputField.style.color = currentColor;
         console.log(`Stilovi primenjeni: bold=${isBold}, italic=${isItalic}, color=${currentColor}`);
     }
+}
+
+// Selektujemo sve inpute za boje
+const colorPickers = document.querySelectorAll('.colorPicker');
+if (colorPickers.length > 0) {
+    colorPickers.forEach(picker => {
+        picker.addEventListener('input', (event) => {
+            const selectedColor = event.target.value;  // Uzimamo izabranu boju
+            const guestName = event.target.parentElement;  // Ime gosta je roditeljski element
+            guestName.style.color = selectedColor;  // Menjamo boju imena gosta
+            console.log(`Boja za gosta promenjena u: ${selectedColor}`);
+        });
+    });
+}
+
+// Kada korisnik pritisne Enter
+const chatInput = document.getElementById('chatInput');
+if (chatInput) {
+    chatInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            let message = this.value;
+            console.log(`Poruka poslata: ${message}`);  // Log kada je poruka poslata
+            socket.emit('chatMessage', {
+                text: message,
+                bold: isBold,
+                italic: isItalic,
+                color: currentColor,
+                nickname: "Admin"  // Ovde možete definisati ime korisnika, ili ga uzeti iz forme ili lokalnog skladišta
+            });
+            this.value = ''; // Isprazni polje za unos
+        }
+    });
 }
 
 // Kada server pošalje poruku
@@ -97,8 +127,7 @@ socket.on('updateGuestList', function (users) {
         users.forEach(user => {
             const newGuest = document.createElement('div');
             newGuest.className = 'guest';
-            newGuest.textContent = user.username; // Prikazujemo username
-            newGuest.style.color = user.color; // Primena boje na ime gosta
+            newGuest.textContent = user;
             guestList.appendChild(newGuest);
         });
     }
