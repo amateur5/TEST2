@@ -5,7 +5,6 @@ const socketIo = require('socket.io');
 const { connectDB, User } = require('./mongo');
 const bcrypt = require('bcrypt');
 const banModule = require("./banModule");
-const ipModule = require('./ip');
 
 const app = express();
 const server = http.createServer(app);
@@ -106,7 +105,7 @@ io.on('connection', (socket) => {
     const uniqueNumber = generateUniqueNumber();
     const nickname = `Gost-${uniqueNumber}`;
 
-    guests[guestId] = { nickname, color: '#FFFFFF' }; // Početna boja za gosta
+    guests[guestId] = { nickname, color: '#FFFFFF', role: 'guest' }; // Početna boja i role za gosta
     console.log(`${nickname} se povezao.`);
 
     // Provera da li je gost banovan
@@ -119,8 +118,9 @@ io.on('connection', (socket) => {
     io.emit('updateGuestList', Object.values(guests));
 
     // Prijavljivanje gosta
-    socket.on('userLoggedIn', (username) => {
-        guests[guestId].nickname = username; // Ažuriramo nickname
+    socket.on('userLoggedIn', (data) => {
+        guests[guestId].nickname = data.username;
+        guests[guestId].role = data.role;  // Dodeljujemo ulogu korisniku
         io.emit('updateGuestList', Object.values(guests));
     });
 
@@ -140,13 +140,13 @@ io.on('connection', (socket) => {
 
     // Funkcija za ažuriranje boje korisnika
     socket.on('updateUserColor', (data) => {
-        guests[guestId].color = data.color;  // Ažuriraj boju korisnika
-        io.emit('updateGuestList', Object.values(guests)); // Ažuriraj listu korisnika
+        guests[guestId].color = data.color;
+        io.emit('updateGuestList', Object.values(guests));
     });
 
-    // Banovanje gosta samo od strane admina "Radio Galaksija"
+    // Banovanje gosta samo od strane admina
     socket.on("toggleBanUser", (targetGuestId) => {
-        if (guests[guestId].nickname === "Radio Galaksija") {
+        if (guests[guestId].role === 'admin') { // Provera da li je admin
             banModule.isGuestBanned(targetGuestId) ? 
                 banModule.unbanGuest(targetGuestId) : 
                 banModule.banGuest(targetGuestId);
@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
         assignedNumbers.delete(parseInt(guests[guestId].nickname.split('-')[1], 10));
         delete guests[guestId];
 
-        // Uklanjanje IP adrese gosta iz spiska kada se odjavi
+        // Uklanjanje IP adrese gosta iz spiska
         connectedIps = connectedIps.filter((userIp) => userIp !== ip);
 
         io.emit('updateGuestList', Object.values(guests));
